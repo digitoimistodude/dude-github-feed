@@ -1,0 +1,16 @@
+{
+  "name": "digitoimistodude/dude-github-feed",
+  "type": "wordpress-plugin",
+  "description": "Dude GitHub feed",
+  "homepage": "https://github.com/digitoimistodude/dude-github-feed",
+  "keywords": ["wordpress", "plugin"],
+  "license": "MIT",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Timi Wahalahti",
+      "email": "timi@dude.fi",
+      "homepage": "https://www.dude.fi"
+    }
+  ]
+}
