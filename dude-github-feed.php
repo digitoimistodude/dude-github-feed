@@ -3,7 +3,7 @@
  * Plugin Name: Dude GitHub feed
  * Plugin URL: https://www.dude.fi
  * Description: Fetches the user and repository activity from GitHub
- * Version: 0.1.0
+ * Version: 1.0.0
  * Author: Timi Wahalahti / DUDE
  * Author URL: http://dude.fi
  * Requires at least: 4.4.2
@@ -144,14 +144,42 @@ Class Dude_Github_Feed {
 		return $activity;
 	} // end function get_repository_activity
 
-	private function _call_api( $endpoint = '' ) {
+	public function get_repository_details( $owner = '', $repository = '' ) {
+		if( empty( $owner ) )
+			return;
+
+		if( empty( $repository ) )
+			return;
+
+		$transient_name = apply_filters( 'dude-github-feed/repository_details_transient', 'dude-github-repo-details-'.$repository );
+		$activity = get_transient( $transient_name );
+	  	if( !empty( $activity ) || false != $activity )
+	    		return $activity;
+
+		$response = self::_call_api( 'repos/'.$owner.'/'.$repository, false );
+		if( $response === FALSE )
+			return;
+
+		$i = 0;
+		$activity = array();
+		$response = apply_filters( 'dude-github-feed/repository_details', json_decode( $response['body'], true ) );
+
+		set_transient( $transient_name, $response, apply_filters( 'dude-github-feed/repository_details_lifetime', '600' ) );
+		return $response;
+	} // end function get_repository_details
+
+	private function _call_api( $endpoint = '', $events = true ) {
 		if( empty( $endpoint ) )
 			return false;
 
-		$response = wp_remote_get( 'https://api.github.com/'.$endpoint.'/events' );
+    		$url = 'https://api.github.com/'.$endpoint;
+    		if( $events )
+      			$url .= '/events';
+
+		$response = wp_remote_get( $url );
 
 		if( $response['response']['code'] !== 200 ) {
-			self::_write_log( 'response status code not 200 OK, endpoint: '.$endpoint.'/events' );
+			self::_write_log( 'response status code not 200 OK, endpoint: '.$url );
 			return false;
 		}
 
